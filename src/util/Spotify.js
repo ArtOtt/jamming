@@ -22,16 +22,16 @@ const Spotify = {
             window.history.pushState("Access Token", null, "/");
             return accessToken;
         } else {
-            const accessUrl = "https://accounts.spotify.com/authorize?client_id=${cliendId}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}";
+            const accessUrl = `https://accounts.spotify.com/authorize?client_id=${cliendId}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}`;
             window.location = accessUrl;
         }
     },
 
     search(term) {
         const accessToken  = Spotify.getAccessToken();
-        return fetch("https://api.spotify.com/v1/search?type=track&q=${term}", {
+        return fetch(`https://api.spotify.com/v1/search?type=track&q=${term}`, {
             headers: {
-                Authorization: "Bear ${accessToken}"
+                Authorization: `Bear ${accessToken}`
             }
         }).then(response => {
             return  response.json();
@@ -47,8 +47,38 @@ const Spotify = {
                 uri: track.uri
             }))
         })
-    }
+    },
     
+    savePlaylist(name, trackUris) {
+        if(!name || !trackUris.length) {
+            return;
+        }
+
+        const accessToken = Spotify.getAccessToken();
+        const headers = {Authorization: `Bear ${accesToken}`};
+        let userID;
+
+        return fetch(`https://api.spotify.com/v1/me`, {headers: headers}
+        ).then(response => response.json()
+        ).then(jsonResponse => {
+            userID = jsonResponse.id;
+            return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`,
+            {
+                headers: headers,
+                method:"POST",
+                body: JSON.stringify({name:name})
+            }).then(response => response.json()
+            ).then(jsonResponse => {
+                const playlistId = jsonResponse.id;
+                return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${playlistId}/tracks`, {
+                    headers:headers,
+                    method: "POST",
+                    body: JSON.stringify({uris: trackUris});
+                })
+            })
+        })
+
+    }
 
        
 
