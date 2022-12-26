@@ -11,11 +11,11 @@ const Spotify = {
         
         //check for access token match
 
-        const accessTokenMatch = window.location.href.match(/access_token=([^&]+*)/);
+        const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/);
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/);
 
         if(accessTokenMatch && expiresInMatch) {
-            accesToken = accessTokenMatch[1];
+            const accesToken = accessTokenMatch[1];
             const expiresIn = Number(expiresInMatch[1]);
 
             window.setTimeout(() => accessToken = "", expiresIn * 1000 );
@@ -52,16 +52,16 @@ const Spotify = {
     savePlaylist(name, trackUris) {
         if(!name || !trackUris.length) {
             return;
-        }
+        };
 
         const accessToken = Spotify.getAccessToken();
-        const headers = {Authorization: `Bear ${accesToken}`};
-        let userID;
+        const headers = {Authorization: `Bear ${accessToken}`};
+        let userId;
 
         return fetch(`https://api.spotify.com/v1/me`, {headers: headers}
         ).then(response => response.json()
         ).then(jsonResponse => {
-            userID = jsonResponse.id;
+            userId = jsonResponse.id;
             return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`,
             {
                 headers: headers,
@@ -73,7 +73,7 @@ const Spotify = {
                 return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${playlistId}/tracks`, {
                     headers:headers,
                     method: "POST",
-                    body: JSON.stringify({uris: trackUris});
+                    body: JSON.stringify({uris: trackUris})
                 })
             })
         })
